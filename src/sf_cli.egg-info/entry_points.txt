@@ -1,0 +1,2 @@
+[console_scripts]
+sf-cli = sf_users.sf_users_cli:cli

@@ -1,0 +1,4 @@
+setuptools
+black
+pre-commit
+gitlint
