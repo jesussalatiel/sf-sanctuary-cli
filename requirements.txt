@@ -2,3 +2,6 @@ setuptools
 black
 pre-commit
 gitlint
+requests
+jira[cli]
+python-dotenv

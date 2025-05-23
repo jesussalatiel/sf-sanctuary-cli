@@ -1,8 +1,7 @@
-import subprocess
-import json
 import click
 from typing import Optional, Dict, List
 from models.user_model import User, UserRole
+from utils.sf_command_executor import _run_sf_command
 
 
 class UserManager:
@@ -10,23 +9,6 @@ class UserManager:
 
     def __init__(self, target_org: str = "default") -> None:
         self.target_org = target_org
-
-    def _run_sf_command(self, command: str) -> Dict:
-        """Executes a Salesforce CLI command and returns parsed JSON output."""
-        try:
-            result = subprocess.run(
-                f"sf {command} --json",
-                shell=True,
-                check=True,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-                text=True,
-            )
-            return json.loads(result.stdout)
-        except subprocess.CalledProcessError as e:
-            print(e)
-            error = json.loads(e.stderr) if e.stderr else {"message": "Unknown error"}
-            raise click.ClickException(error.get("message", "Command failed"))
 
     def create_user(self, user: User) -> User:
         """Creates a new Salesforce user and returns the updated User object."""
@@ -47,7 +29,7 @@ class UserManager:
             f"data create record --sobject User --values "
             f"\"{' '.join(value for value in values if value)}\""
         )
-        result = self._run_sf_command(cmd)
+        result = _run_sf_command(cmd)
         user.id = result["result"]["id"]
         return user
 
@@ -59,7 +41,7 @@ class UserManager:
             f"FROM User {where_clause} ORDER BY LastName"
         )
 
-        result = self._run_sf_command(f'data query --query "{query}"')
+        result = _run_sf_command(f'data query --query "{query}"')
         records = result.get("result", {}).get("records", [])
         users = []
         for record in records:
@@ -82,7 +64,7 @@ class UserManager:
     def _get_profile_id(self, role: UserRole) -> str:
         """Fetches the Salesforce Profile Id for a given user role."""
         query = f"SELECT Id FROM Profile WHERE Name = '{role.value}'"
-        result = self._run_sf_command(f'data query --query "{query}"')
+        result = _run_sf_command(f'data query --query "{query}"')
         records = result.get("result", {}).get("records")
         if not records:
             raise click.ClickException(f"Profile not found for role: {role.value}")

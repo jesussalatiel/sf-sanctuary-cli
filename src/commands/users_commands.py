@@ -1,14 +1,17 @@
 import click
 from rich.console import Console
 from rich.table import Table
-from managers.user_manager import UserManager
 import json
+from managers.user_manager import UserManager
 from models.user_model import CreateUserParams, UserRole, User
+from utils.logger import configure_logger
 
 console = Console()
 ERROR_STYLE = "bold red"
 SUCCESS_STYLE = "bold green"
 WARNING_STYLE = "bold yellow"
+
+logger = configure_logger(__name__)
 
 
 @click.group()
@@ -54,9 +57,8 @@ def create(ctx: click.Context, **kwargs) -> None:
         console.print(user)
 
     created_user = manager.create_user(user)
-    console.print(
-        f"User created with ID: [bold]{created_user.id}[/bold]", style=SUCCESS_STYLE
-    )
+
+    logger.info(f"User created successfully with ID: {created_user.id}")
 
 
 @users.command()
