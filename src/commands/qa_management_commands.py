@@ -18,32 +18,6 @@ JIRA_TOKEN: Optional[str] = os.environ.get("JIRA_TOKEN")
 console = Console()
 
 
-def print_colored_table(
-    data: List[Dict], columns: List[str], title: str = "Jira Issues"
-) -> None:
-    """Prints a list of dictionaries in a colored table using rich.
-
-    Args:
-        data (List[Dict]): List of issue data dictionaries.
-        columns (List[str]): List of fields to show.
-        title (str): Title for the table.
-    """
-    if not data:
-        console.print("No issues to display.")
-        return
-
-    table = Table(title=title)
-    colors = ["cyan", "magenta", "yellow", "green", "blue", "red"]
-    for index, header in enumerate(columns):
-        table.add_column(f"[{colors[index % len(colors)]}]{header}[/]")
-
-    for item in data:
-        row = [str(item.get(header, "N/A")) for header in columns]
-        table.add_row(*row)
-
-    console.print(table)
-
-
 @click.group()
 @click.pass_context
 def qa(ctx: click.Context) -> None:
@@ -261,3 +235,29 @@ def build_jql(
     if assignee:
         jql_parts.append(f'assignee = "{assignee}"')
     return " AND ".join(jql_parts)
+
+
+def print_colored_table(
+    data: List[Dict], columns: List[str], title: str = "Jira Issues"
+) -> None:
+    """Prints a list of dictionaries in a colored table using rich.
+
+    Args:
+        data (List[Dict]): List of issue data dictionaries.
+        columns (List[str]): List of fields to show.
+        title (str): Title for the table.
+    """
+    if not data:
+        console.print("No issues to display.")
+        return
+
+    table = Table(title=title)
+    colors = ["cyan", "magenta", "yellow", "green", "blue", "red"]
+    for index, header in enumerate(columns):
+        table.add_column(f"[{colors[index % len(colors)]}]{header}[/]")
+
+    for item in data:
+        row = [str(item.get(header, "N/A")) for header in columns]
+        table.add_row(*row)
+
+    console.print(table)
