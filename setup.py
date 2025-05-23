@@ -33,7 +33,7 @@ setup(
     ],
     entry_points={
         "console_scripts": [
-            "sf-cli=sf_cli.sf_cli:cli",
+            "sf-cli=sf_cli.main:cli",
         ],
     },
     classifiers=[
