@@ -21,12 +21,19 @@ setup(
     packages=find_packages(where="src"),
     include_package_data=True,
     install_requires=[
-        "click>=8.0",
-        "rich>=13.0",
+        "click",
+        "rich",
+        "setuptools",
+        "black",
+        "pre-commit",
+        "gitlint",
+        "requests",
+        "jira[cli]",
+        "python-dotenv",
     ],
     entry_points={
         "console_scripts": [
-            "sf-cli=sf_cli:cli",
+            "sf-cli=sf_cli.sf_cli:cli",
         ],
     },
     classifiers=[
