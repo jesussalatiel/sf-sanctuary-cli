@@ -5,7 +5,7 @@ import subprocess
 import click
 from rich.console import Console
 
-from utils.sf_command_executor import _run_sf_command
+from utils.sf_command_executor import _run_sf_command, _run_command
 from utils.table import print_table
 
 console = Console()
@@ -14,7 +14,7 @@ SUCCESS_STYLE = "bold green"
 WARNING_STYLE = "bold yellow"
 
 ENVIRONMENTS = {
-    "dev": "https://sanctuary--commondev.sandbox.my.salesforce.com/",
+    "commondev": "https://sanctuary--commondev.sandbox.my.salesforce.com/",
     "qa": "https://sanctuary--qa.sandbox.my.salesforce.com/",
     "poc": "https://sanctuary--poc.sandbox.lightning.force.com/",
 }
@@ -29,34 +29,34 @@ def salesforce(ctx: click.Context):
 
 @salesforce.command()
 @click.option(
-    "--env",
+    "--alias",
     required=True,
     type=click.Choice(ENVIRONMENTS.keys(), case_sensitive=False),
     help=f"Environment to login to: {', '.join(ENVIRONMENTS.keys())}",
 )
-def login(env):
+def login(alias):
     """Login to a specified Salesforce environment using Salesforce CLI."""
-    alias = env.lower()
+    alias = alias.lower()
     if alias in ENVIRONMENTS:
         console.print(
             f"Attempting login to [bold blue]{alias}[/bold blue]...",
             style=WARNING_STYLE,
         )
         try:
-            cmd = f"org login web --alias {alias}"
+            cmd = f"org login web --instance-url {ENVIRONMENTS[alias]}"
             result = _run_sf_command(cmd)
 
             console.print(
-                f"[bold green]Successfully initiated login for '{alias}'.[/bold green]"
+                f"[bold green]Successfully initiated login for '{ENVIRONMENTS[alias]}'.[/bold green]"
             )
             console.print(
                 "[italic]A browser window should open for authentication.[/italic]"
             )
-            if result.stdout:
-                console.print(f"CLI Output:\n{result.stdout}")
-            if result.stderr:
+            if result.get("result"):
+                console.print(f"CLI Output:\n{result['result']}")
+            if result.get("warnings"):
                 console.print(
-                    f"[bold yellow]CLI Errors/Warnings:\n{result.stderr}[/bold yellow]"
+                    f"[bold yellow]CLI Warnings:\n{result['warnings']}[/bold yellow]"
                 )
         except subprocess.CalledProcessError as error:
             console.print(
@@ -74,7 +74,7 @@ def login(env):
             )
     else:
         console.print(
-            f"[bold red]Error:[/bold red] Invalid environment '{env}'.",
+            f"[bold red]Error:[/bold red] Invalid environment '{alias}'.",
             style=ERROR_STYLE,
         )
         console.print(f"Choose from: {', '.join(ENVIRONMENTS.keys())}")
@@ -109,11 +109,11 @@ def logout(alias):
         console.print(
             f"[bold green]Successfully logged out from '{alias}'.[/bold green]"
         )
-        if result.stdout:
-            console.print(f"CLI Output:\n{result.stdout}")
-        if result.stderr:
+        if result.get("result"):
+            console.print(f"CLI Output:\n{result['result']}")
+        if result.get("warnings"):
             console.print(
-                f"[bold yellow]CLI Errors/Warnings:\n{result.stderr}[/bold yellow]"
+                f"[bold yellow]CLI Warnings:\n{result['warnings']}[/bold yellow]"
             )
     except subprocess.CalledProcessError as error:
         console.print(

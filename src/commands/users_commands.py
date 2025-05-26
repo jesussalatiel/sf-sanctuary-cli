@@ -72,7 +72,6 @@ def list_users(ctx: click.Context, active_only: bool, output_format: str):
     manager: UserManager = ctx.obj["user_manager"]
     users = manager.list_users(active_only)
     if output_format == "json":
-        # Convert User dataclasses to dict, handle datetime serialization
         click.echo(json.dumps([u.__dict__ for u in users], indent=2, default=str))
     else:
         table = Table(title="Salesforce Users")

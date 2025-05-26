@@ -45,7 +45,10 @@ def qa(ctx: click.Context) -> None:
 def get_project_issues(
     project_key: str, fields: str, status: Optional[str], assignee: Optional[str]
 ) -> None:
-    """Show issues for a project, optionally filtered by status and assignee."""
+    """Show issues for a project, optionally filtered by status and assignee.
+    Example:
+        $ python cli.py qa get-project-issues --project-key CXP --assignee "Jesus Salatiel Bustamante Robles"
+    """
     if not all([JIRA_SERVER, JIRA_EMAIL, JIRA_TOKEN]):
         console.print(
             "JIRA_SERVER, JIRA_EMAIL, and JIRA_TOKEN environment variables must be set.",
@@ -59,10 +62,20 @@ def get_project_issues(
     field_list = [f.strip() for f in fields.split(",")]
     if "status" not in field_list and assignee:
         field_list.append("status")
-    jira_fields = ",".join(set(field_list))
+    if "key" not in field_list:
+        field_list.append("key")
+    if "link" not in field_list:
+        field_list.append("link")
+
+    jira_fields = ",".join(set(field_list) - {"link"})
 
     issues = jira.search_issues(jql, maxResults=1000, fields=jira_fields)
-    extracted_data = [extract_issue_data(issue, field_list) for issue in issues]
+
+    extracted_data = []
+    for issue in issues:
+        issue_data = extract_issue_data(issue, field_list)
+        issue_data["link"] = f"{JIRA_SERVER}/browse/{issue.key}"
+        extracted_data.append(issue_data)
 
     if extracted_data:
         print_colored_table(

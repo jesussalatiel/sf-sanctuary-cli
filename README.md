@@ -136,3 +136,7 @@ And then enable it in your Git repository:
 pre-commit install
 
 ```
+
+## Documentation
+
+- [This module implements a friendly (well, friendlier) interface between the raw JSON responses from Jira and the Resource/dict abstractions provided by this library](https://jira.readthedocs.io/examples.html#quickstart)
